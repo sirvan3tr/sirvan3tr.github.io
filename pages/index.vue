@@ -21,7 +21,7 @@ v-container
             li
               a(href='http://innovationlab.uk') InnovationLab.UK
               v-icon(small) mdi-launch
-              | Rethinking the science of innovation
+              | Rethinking the science of innovation.
             li
               a(href='http://innovoteams.com') InnovoTeams
               v-icon(small) mdi-launch
@@ -33,14 +33,14 @@ v-container
               | deeID: Identity and Authentication System. Now part of 
               a(href='https://conceptionx.org/' target='_blank') ConceptionX&apos;s
               |  Cohort III venture builder.
-            li Document Provenance Using Blockchain
+            li Document Provenance Using Blockchain.
             li
               strong
                 a(href='http://www.smartcommuter.innovationlab.uk/' target='_blank') SmartCommuter
                 v-icon(small) mdi-launch
               |  Novel property search engine.
             li
-              a(href='docs/essays/royalsignalessay_sirvan.pdf') Impact of technology on the battlefield of the future
+              a(href='docs/essays/royalsignalessay_sirvan.pdf') Impact of technology on the battlefield of the future.
               |  [pdf]
       v-card.mt-3
         v-card-title Papers and publications
