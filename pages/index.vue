@@ -61,7 +61,7 @@ v-container
           ul
             li
               | Innovation of Bitcoin--how to take it mainstream. 
-              a(href='docs/presentations/2020-10-09_sirvan_bitcoin-innovation') [pdf]
+              a(href='docs/presentations/2020-10-09_sirvan_bitcoin-innovation.pdf') [pdf]
     v-col(lg='3')
       v-card
         v-card-title Links and other
@@ -80,5 +80,5 @@ v-container
               a(href='http://www.paulgraham.com/useful.html') Paul Graham&apos;s How to write usefully
               v-icon(small) mdi-launch
             li
-              a(href='/static/docs/inspire/Toolsmith-CACM.pdf') The Computer Scientist as a Toolsmith [pdf]
+              a(href='docs/inspire/Toolsmith-CACM.pdf') The Computer Scientist as a Toolsmith [pdf]
 </template>
