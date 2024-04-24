@@ -1,0 +1,16 @@
+[
+  {
+    "name": "inspire",
+    "path": "/inspire",
+    "component": "/home/sirvan/sites/sirvan/sirvan3tr.github.io/pages/inspire.vue",
+    "chunkName": "pages/inspire",
+    "_name": "_558d9531"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "/home/sirvan/sites/sirvan/sirvan3tr.github.io/pages/index.vue",
+    "chunkName": "pages/index",
+    "_name": "_c97a9a2e"
+  }
+]
