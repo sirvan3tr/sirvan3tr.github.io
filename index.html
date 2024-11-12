@@ -24,14 +24,14 @@
             gap: 1em;
         }
         .card {
-            background: rgb(49 49 49 / 10%);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgb(0 0 0 / 10%);
         }
         .card-title {
             font-weight: bold;
-            margin-bottom: 0.5em;
+            width: 85%;
+        }
+        .card-description {
+            line-height: 20px;
+            text-align: justify;
         }
         table {
             width: 100%;
@@ -43,7 +43,7 @@
             border-bottom: 1px solid #ddd;
         }
 
-                .btn {
+        .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -83,8 +83,8 @@
     </style>
 </head>
 <body>
-<div class="container mx-auto">
-    <header class="header">
+<div class="bg-stone-50 pt-10 pb-6 mb-2">
+    <header class="container mx-auto">
         <div class="flex justify-between items-center">
             <h1 class="text-3xl font-bold">Sirvan Almasi</h1>
             <div class="social-links">
@@ -106,23 +106,32 @@
             </div>
         </div>
         <p>Engineer and humorist.</p>
+        <blockquote class="pl-4 my-4 italic text-gray-600 border-l-4 border-gray-300">
+            "Whatever you can do or dream you can, begin it. Boldness has genius, power, and magic in it."
+            <cite class="block text-sm mt-2">- Goethe</cite>
+        </blockquote>
     </header>
+</div>
+<div class="container mx-auto">
 
-
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-4 gap-2">
         <!-- Left Column (Main Content) -->
         <div class="col-span-3 bg-white p-4">
-            <h1 class="text-2xl font-bold mb-4 mt-6">Projects</h1>
+            <h1 class="text-2xl font-bold mb-4">Projects</h1>
             <div id="projects" class="project-grid">
                 <div class="loading">Loading projects...</div>
             </div>
         </div>
         
         <!-- Right Column (Sidebar) -->
-        <div class="col-span-1 bg-neutral-200 p-4">
+        <div class="col-span-1 bg-stone-200 p-4 rounded-lg">
             <h2 class="text-2xl font-bold mb-4">Links</h2>
             <div id="sidebarLinks">
                 <div class="loading">Loading links...</div>
+            </div>
+            <div class="mt-6 border border-solid border-stone-400 rounded-lg px-2 py-1 text-xs flex justify-center items-center">
+                <div>Powered By</div>
+                <img src="img/gsheet_logo.png" width="30" alt="Powered by Google Sheets" />
             </div>
         </div>
     </div>
@@ -135,7 +144,7 @@
     <footer class="rounded-lg bg-gray-600 text-white py-4 mt-12">
         <div class="container mx-auto p-8">
             <h2 class="text-2xl font-bold">How is this site made?</h2>
-            <p class="mt-2">This site is built using HTML, CSS, and JavaScript--hosted on github. The data is stored in a Google Sheet and fetched using the PapaParse library. This touches on one of my core philosophies that everything is data.</p>
+            <p class="mt-2">This site is built using HTML, CSS, and JavaScript--hosted on github. The data is stored in a Google Sheet and fetched using the PapaParse library. Everything is data.</p>
         </div>
         <hr />
         <div class="container mx-auto text-center space-y-2 p-8">
@@ -151,14 +160,20 @@
                 const html = data
                     .filter(item => item.title || item.description)
                     .map(item => `
-                        <div class="card flex flex-col h-full">
-                            ${item.img ? `<img class="rounded-lg" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.title)}" class="h-48 object-cover" />` : ''}
+                        <div class="card flex flex-col h-full hover:shadow-md hover:bg-neutral-50 bg-indigo-50/20 rounded-lg border border-solid border-indigo-200 hover:border-neutral-400">
+                            ${item.img ? `<img class="shadow-md rounded-lg" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.title)}" class="h-48 object-cover" />` : ''}
+                            <div class="absolute top-3 right-3">
+                              <span class="px-2 py-1 text-xs font-medium text-white bg-black/50 backdrop-blur-md rounded-full">
+                                ${escapeHtml(item.year || '')}
+                              </span>
+                            </div>
                             <div class="card-content px-2 pt-2 flex-grow">
-                                <div class="card-title">${escapeHtml(item.title || '')}</div>
+                                <div class="card-title text-indigo-800">${escapeHtml(item.title || '')}</div>
+                                <div class="card-tags mb-2">${escapeHtml(item.tags || '').split(' ').map(tag => `<span class="rounded-lg bg-indigo-200/50 text-indigo-800 py-1 px-2 text-xs mr-1">${tag}</span>`).join('')}</div>
                                 <div class="card-description">${escapeHtml(item.description || '')}</div>
                             </div>
                             <div class="card-footer flex justify-end p-2 mt-auto">
-                                ${item.link ? `<a class='bg-blue-500 hover:bg-blue-400 text-white font-bold py-1 px-2 border-b-4 border-blue-700 hover:border-blue-500 rounded' href="${escapeHtml(item.link)}" target="_blank">View Project</a>` : ''}
+                                ${item.link ? `<a class='bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-1 px-2 border-b-4 border-indigo-700 hover:border-indigo-500 rounded' href="${escapeHtml(item.link)}" target="_blank">View Project</a>` : ''}
                             </div>
                         </div>
                     `).join('');
