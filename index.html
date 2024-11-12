@@ -124,7 +124,7 @@
         </div>
         
         <!-- Right Column (Sidebar) -->
-        <div class="col-span-1 bg-stone-200 p-4 rounded-lg">
+        <div class="col-span-1 bg-stone-50 p-4 rounded-lg">
             <h2 class="text-2xl font-bold mb-4">Links</h2>
             <div id="sidebarLinks">
                 <div class="loading">Loading links...</div>
@@ -160,7 +160,7 @@
                 const html = data
                     .filter(item => item.title || item.description)
                     .map(item => `
-                        <div class="card flex flex-col h-full hover:shadow-md hover:bg-neutral-50 bg-indigo-50/20 rounded-lg border border-solid border-indigo-200 hover:border-neutral-400">
+                        <div class="card relative flex flex-col h-full hover:shadow-md hover:bg-neutral-50 bg-stone-50/20 rounded-lg border border-solid border-stone-200 hover:border-stone-200">
                             ${item.img ? `<img class="shadow-md rounded-lg" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.title)}" class="h-48 object-cover" />` : ''}
                             <div class="absolute top-3 right-3">
                               <span class="px-2 py-1 text-xs font-medium text-white bg-black/50 backdrop-blur-md rounded-full">
@@ -168,12 +168,12 @@
                               </span>
                             </div>
                             <div class="card-content px-2 pt-2 flex-grow">
-                                <div class="card-title text-indigo-800">${escapeHtml(item.title || '')}</div>
-                                <div class="card-tags mb-2">${escapeHtml(item.tags || '').split(' ').map(tag => `<span class="rounded-lg bg-indigo-200/50 text-indigo-800 py-1 px-2 text-xs mr-1">${tag}</span>`).join('')}</div>
-                                <div class="card-description">${escapeHtml(item.description || '')}</div>
+                                <div class="card-title text-zinc-800">${escapeHtml(item.title || '')}</div>
+                                <div class="card-tags mb-2">${escapeHtml(item.tags || '').split(' ').map(tag => `<span class="rounded-lg bg-zinc-200/50 text-zinc-800 py-1 px-2 text-xs mr-1">${tag}</span>`).join('')}</div>
+                                <div class="card-description text-zinc-600">${escapeHtml(item.description || '')}</div>
                             </div>
                             <div class="card-footer flex justify-end p-2 mt-auto">
-                                ${item.link ? `<a class='bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-1 px-2 border-b-4 border-indigo-700 hover:border-indigo-500 rounded' href="${escapeHtml(item.link)}" target="_blank">View Project</a>` : ''}
+                                ${item.link ? `<a class='bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-1 px-2 border-b-4 border-indigo-700 hover:border-indigo-500 rounded' href="${escapeHtml(item.link)}" target="_blank">View More</a>` : ''}
                             </div>
                         </div>
                     `).join('');
