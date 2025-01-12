@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Masker</title>
+    <style>
+        :root {
+            --primary-color: #00ff88;
+            --secondary-color: #0066ff;
+            --background-dark: #0a0b1e;
+            --panel-bg: #12152e;
+            --text-color: #e0e0ff;
+            --input-bg: #1a1f3d;
+            --glow-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--background-dark), #1a1f3d);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            background: var(--panel-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin: 0 0 2rem 0;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: var(--glow-shadow);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: var(--input-bg);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--glow-shadow);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--panel-bg);
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-shadow);
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--input-bg);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--primary-color), transparent);
+        }
+
+        .error {
+            color: #ff4466;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            border-left: 3px solid #ff4466;
+            background: rgba(255, 68, 102, 0.1);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .probability-value {
+            display: inline-block;
+            margin-left: 1rem;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Animated background for the result */
+        @keyframes glow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .result.has-value {
+            background: linear-gradient(270deg, var(--input-bg), #1d2347);
+            background-size: 200% 200%;
+            animation: glow 3s ease infinite alternate;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Password Masker</h1>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="text" id="password" placeholder="Enter your password">
+        </div>
+
+        <div class="form-group">
+            <label for="probability">
+                Mask Probability
+                <span class="probability-value">0.5</span>
+            </label>
+            <input type="range" id="probability" min="0" max="1" step="0.1" value="0.5">
+        </div>
+
+        <div class="form-group">
+            <label for="minMasked">Minimum Masked Characters</label>
+            <input type="number" id="minMasked" value="5" min="0">
+        </div>
+
+        <div class="form-group">
+            <label for="minVisible">Minimum Visible Characters</label>
+            <input type="number" id="minVisible" value="4" min="0">
+        </div>
+
+        <button onclick="maskPassword()">Generate Mask</button>
+
+        <div class="result" id="result">
+            Masked password will appear here
+        </div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        function createMask(password, maskProbability = 0.5, minMasked = 5, minVisible = 4) {
+            const passwordLength = password.length;
+            
+            if (passwordLength < minMasked + minVisible) {
+                throw new Error(
+                    `Password length (${passwordLength}) must be at least ` +
+                    `min_masked (${minMasked}) + min_visible (${minVisible})`
+                );
+            }
+            
+            if (maskProbability < 0 || maskProbability > 1) {
+                throw new Error("mask_probability must be between 0 and 1");
+            }
+            
+            if (minMasked < 0 || minVisible < 0) {
+                throw new Error("min_masked and min_visible must be non-negative");
+            }
+            
+            let maskCount = Math.round(passwordLength * maskProbability);
+            maskCount = Math.max(minMasked, Math.min(maskCount, passwordLength - minVisible));
+            
+            const charIndices = Array.from({length: passwordLength}, (_, i) => i);
+            const indicesToMask = new Set(
+                charIndices.sort(() => Math.random() - 0.5).slice(0, maskCount)
+            );
+            
+            return Array.from(password)
+                .map((char, i) => indicesToMask.has(i) ? '*' : char)
+                .join('');
+        }
+
+        function maskPassword() {
+            const password = document.getElementById('password').value;
+            const probability = parseFloat(document.getElementById('probability').value);
+            const minMasked = parseInt(document.getElementById('minMasked').value);
+            const minVisible = parseInt(document.getElementById('minVisible').value);
+            
+            const resultElement = document.getElementById('result');
+            const errorElement = document.getElementById('error');
+            
+            try {
+                const maskedPassword = createMask(password, probability, minMasked, minVisible);
+                resultElement.textContent = maskedPassword;
+                resultElement.classList.add('has-value');
+                errorElement.textContent = '';
+            } catch (error) {
+                errorElement.textContent = error.message;
+                resultElement.classList.remove('has-value');
+            }
+        }
+
+        document.getElementById('probability').addEventListener('input', function(e) {
+            document.querySelector('.probability-value').textContent = e.target.value;
+        });
+    </script>
+</body>
+</html>
