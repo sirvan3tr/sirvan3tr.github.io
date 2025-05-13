@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle Breathing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            text-align: center;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .controls:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+        }
+
+        .controls label {
+            margin-right: 10px;
+            font-weight: 500;
+            color: #444;
+        }
+
+        .controls input[type="number"] {
+            width: 60px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .controls input[type="number"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .controls button {
+            padding: 10px 24px;
+            margin-left: 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            font-size: 1em;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+        }
+
+        .controls button:hover {
+            background-color: #0069d9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.25);
+        }
+
+        .controls button.stop {
+            background-color: #dc3545;
+            box-shadow: 0 2px 5px rgba(220, 53, 69, 0.2);
+        }
+        .controls button.stop:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.25);
+        }
+
+        #breathing-circle-container {
+            width: 250px; /* Fixed container size */
+            height: 250px; /* Fixed container size */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative; /* For absolute positioning of text */
+        }
+        
+        #boundary-circle {
+            position: absolute;
+            width: 200px; /* Same as MAX_SIZE */
+            height: 200px; /* Same as MAX_SIZE */
+            border: 2px dotted rgba(70, 130, 180, 0.4); /* Steel blue with transparency */
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        #breathing-circle {
+            width: 50px;  /* Initial small size */
+            height: 50px; /* Initial small size */
+            background: radial-gradient(circle at 40% 40%, 
+                                      rgb(154, 207, 233) 0%,
+                                      rgb(135, 206, 235) 70%, 
+                                      rgb(118, 180, 205) 100%); /* Gradient for depth */
+            box-shadow: 0 0 15px rgba(135, 206, 235, 0.5); /* Subtle glow */
+            border: 1px solid rgba(70, 130, 180, 0.6); /* Thinner, semi-transparent border */
+            border-radius: 50%; /* Make it a circle */
+            /* Removing transition here as we'll control animation with JS */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-size: 1.2em;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            z-index: 1; /* Ensure circle stays above the boundary */
+        }
+
+        /* Removing class-based size changes as we'll control this with JS */
+        #breathing-circle.inhale {
+            background: radial-gradient(circle at 40% 40%, 
+                                      rgb(160, 238, 160) 0%,
+                                      rgb(144, 238, 144) 70%, 
+                                      rgb(124, 205, 124) 100%); /* Light Green gradient */
+            box-shadow: 0 0 15px rgba(144, 238, 144, 0.5); /* Green glow */
+        }
+
+        #breathing-circle.hold {
+            background: radial-gradient(circle at 40% 40%, 
+                                      rgb(255, 223, 44) 0%,
+                                      rgb(255, 215, 0) 70%, 
+                                      rgb(218, 184, 0) 100%); /* Gold gradient */
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); /* Gold glow */
+        }
+
+        #breathing-circle.exhale {
+            background: radial-gradient(circle at 40% 40%, 
+                                      rgb(255, 174, 140) 0%,
+                                      rgb(255, 160, 122) 70%, 
+                                      rgb(224, 140, 107) 100%); /* Light Salmon gradient */
+            box-shadow: 0 0 15px rgba(255, 160, 122, 0.5); /* Salmon glow */
+        }
+        
+        #instruction-text {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            transition: opacity 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        #timer-text {
+            font-size: 2.5em;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        #status-message {
+            margin-top: 25px;
+            font-style: italic;
+            color: #666;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+        
+        /* Meditation timer styles */
+        #meditation-timer {
+            margin-top: 10px;
+            font-size: 1.2em;
+            font-weight: 300;
+            color: #666;
+            letter-spacing: 0.5px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        #meditation-timer.active {
+            color: #007bff;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        #reset-timer-button {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #666;
+            padding: 0;
+            margin-left: 5px;
+        }
+        
+        #reset-timer-button:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: rotate(30deg);
+        }
+        
+        #reset-timer-button:active {
+            background: rgba(0, 0, 0, 0.15);
+            transform: scale(0.95) rotate(30deg);
+        }
+        
+        /* Add animation for the text to fade in/out during transitions */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Inner circle for additional depth */
+        #inner-circle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            width: 70%;
+            height: 70%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(1px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <label for="duration">Seconds per phase:</label>
+        <input type="number" id="duration" value="4" min="1" max="10">
+        <button id="start-stop-button">Start</button>
+    </div>
+
+    <div id="breathing-circle-container">
+        <div id="boundary-circle"></div>
+        <div id="breathing-circle">
+            <div id="inner-circle">
+                <div id="instruction-text">Ready</div>
+                <div id="timer-text"></div>
+            </div>
+        </div>
+    </div>
+    <div id="status-message">Click "Start" to begin.</div>
+    <div id="meditation-timer">
+        <span>Total Time: 00:00</span>
+        <button id="reset-timer-button" title="Reset Timer">↺</button>
+    </div>
+
+    <script>
+        const circle = document.getElementById('breathing-circle');
+        const instructionText = document.getElementById('instruction-text');
+        const timerText = document.getElementById('timer-text');
+        const durationInput = document.getElementById('duration');
+        const startStopButton = document.getElementById('start-stop-button');
+        const statusMessage = document.getElementById('status-message');
+        const boundaryCircle = document.getElementById('boundary-circle');
+        const innerCircle = document.getElementById('inner-circle');
+        const meditationTimer = document.getElementById('meditation-timer');
+        const resetTimerButton = document.getElementById('reset-timer-button');
+
+        let duration = parseInt(durationInput.value, 10);
+        let phase = 0; // 0: Inhale, 1: Hold, 2: Exhale, 3: Hold
+        let countdown;
+        let intervalId;
+        let animationId;
+        let isRunning = false;
+        let phaseStartTime = 0;
+        let lastTimestamp = 0;
+        
+        // Meditation timer variables
+        let meditationStartTime = 0;
+        let meditationTotalTime = 0;
+        let meditationTimerId;
+        
+        // Size constants
+        const MIN_SIZE = 50;
+        const MAX_SIZE = 200;
+
+        const phases = [
+            { name: "Inhale", class: "inhale" },
+            { name: "Hold", class: "hold" },
+            { name: "Exhale", class: "exhale" },
+            { name: "Hold", class: "hold" }
+        ];
+        
+        // Easing function to make animation more natural
+        function easeInOutQuad(t) {
+            return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        }
+        
+        // Format time in minutes and seconds
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Start meditation timer
+        function startMeditationTimer() {
+            meditationStartTime = Date.now();
+            meditationTimer.classList.add('active');
+            
+            meditationTimerId = setInterval(() => {
+                // Calculate total elapsed time in seconds
+                const currentTime = Date.now();
+                const elapsedSeconds = Math.floor((currentTime - meditationStartTime) / 1000) + meditationTotalTime;
+                
+                // Update the timer display
+                const timerText = formatTime(elapsedSeconds);
+                const timerDisplay = meditationTimer.querySelector('span') || document.createElement('span');
+                timerDisplay.textContent = `Total Time: ${timerText}`;
+                
+                // If the span is not already in the DOM, add it
+                if (!timerDisplay.parentNode) {
+                    // Clear the timer content except for the button
+                    const resetButton = document.getElementById('reset-timer-button');
+                    meditationTimer.innerHTML = '';
+                    meditationTimer.appendChild(timerDisplay);
+                    meditationTimer.appendChild(resetButton);
+                }
+            }, 1000);
+        }
+        
+        // Pause meditation timer
+        function pauseMeditationTimer() {
+            clearInterval(meditationTimerId);
+            meditationTimer.classList.remove('active');
+            
+            // Store the accumulated time
+            const currentTime = Date.now();
+            meditationTotalTime += Math.floor((currentTime - meditationStartTime) / 1000);
+        }
+
+        function resetCircleToInitial() {
+            circle.classList.remove('inhale', 'hold', 'exhale');
+            circle.style.width = MIN_SIZE + 'px';
+            circle.style.height = MIN_SIZE + 'px';
+            // Make boundary circle visible when in initial state
+            boundaryCircle.style.opacity = '1';
+            instructionText.textContent = "Ready";
+            timerText.textContent = "";
+            // Ensure inner circle sizing is proportional
+            updateInnerCircle(MIN_SIZE);
+        }
+        
+        function updateInnerCircle(outerSize) {
+            // Keep inner circle at 70% of the outer circle size
+            const innerSize = outerSize * 0.7;
+            innerCircle.style.width = innerSize + 'px';
+            innerCircle.style.height = innerSize + 'px';
+        }
+        
+        function updatePhaseVisuals() {
+            // Update text instructions and timer
+            instructionText.textContent = phases[phase].name;
+            timerText.textContent = countdown;
+            
+            // Remove all phase classes first
+            circle.classList.remove('inhale', 'hold', 'exhale');
+            
+            // Add appropriate class for current phase (for color change only)
+            circle.classList.add(phases[phase].class);
+            
+            // Add subtle text animation on phase change
+            instructionText.style.animation = 'none';
+            timerText.style.animation = 'none';
+            // Trigger reflow
+            void instructionText.offsetWidth;
+            void timerText.offsetWidth;
+            // Start animation
+            instructionText.style.animation = 'pulse 1.5s ease';
+            timerText.style.animation = 'pulse 1.5s ease';
+        }
+        
+        function animateBreathing(timestamp) {
+            if (!isRunning) return;
+            
+            // Calculate time elapsed in current phase in seconds
+            const elapsedInPhase = (timestamp - phaseStartTime) / 1000;
+            // Calculate smooth progress (0 to 1) for the current phase
+            const linearProgress = Math.min(elapsedInPhase / duration, 1);
+            // Apply easing for more natural motion
+            const easedProgress = easeInOutQuad(linearProgress);
+            
+            // Calculate the target size based on current phase
+            let targetSize;
+            
+            if (phase === 0) { // Inhale - expand from MIN to MAX
+                targetSize = MIN_SIZE + (MAX_SIZE - MIN_SIZE) * easedProgress;
+                // Fade out boundary as circle approaches it
+                if (targetSize > MAX_SIZE * 0.9) {
+                    const remainingProgress = 1 - ((MAX_SIZE - targetSize) / (MAX_SIZE * 0.1));
+                    boundaryCircle.style.opacity = 1 - remainingProgress * 0.8;
+                }
+            } 
+            else if (phase === 1) { // Hold after inhale - stay at MAX
+                targetSize = MAX_SIZE;
+                // Keep boundary faded during max expansion
+                boundaryCircle.style.opacity = '0.2';
+            }
+            else if (phase === 2) { // Exhale - shrink from MAX to MIN
+                targetSize = MAX_SIZE - (MAX_SIZE - MIN_SIZE) * easedProgress;
+                // Fade boundary back in as circle shrinks
+                if (targetSize < MAX_SIZE * 0.9) {
+                    const shrinkProgress = (MAX_SIZE * 0.9 - targetSize) / (MAX_SIZE * 0.9 - MIN_SIZE);
+                    boundaryCircle.style.opacity = 0.2 + shrinkProgress * 0.8;
+                }
+            }
+            else { // Hold after exhale - stay at MIN
+                targetSize = MIN_SIZE;
+                // Keep boundary visible during min contraction
+                boundaryCircle.style.opacity = '1';
+            }
+            
+            // Apply the calculated size
+            circle.style.width = targetSize + 'px';
+            circle.style.height = targetSize + 'px';
+            
+            // Update inner circle to maintain proportion
+            updateInnerCircle(targetSize);
+            
+            // Calculate delta time to ensure smooth animation rate
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+            
+            // Continue animation
+            animationId = requestAnimationFrame(animateBreathing);
+        }
+
+        function startBreathing() {
+            if (isRunning) return;
+            isRunning = true;
+            startStopButton.textContent = "Stop";
+            startStopButton.classList.add('stop');
+            durationInput.disabled = true;
+            statusMessage.textContent = "Breathing in progress...";
+
+            duration = parseInt(durationInput.value, 10) || 4;
+            phase = 0; // Start with Inhale
+            countdown = duration;
+            phaseStartTime = performance.now();
+            lastTimestamp = phaseStartTime;
+
+            // Initial setup for the first phase
+            updatePhaseVisuals();
+            
+            // Start the interval for counting down
+            intervalId = setInterval(updateTimer, 1000);
+            
+            // Start the animation frame loop
+            cancelAnimationFrame(animationId);
+            animateBreathing(performance.now());
+            
+            // Start meditation timer
+            startMeditationTimer();
+        }
+
+        function updateTimer() {
+            countdown--;
+            timerText.textContent = countdown;
+            
+            if (countdown <= 0) {
+                // Advance to the next phase
+                phase = (phase + 1) % 4;
+                duration = parseInt(durationInput.value, 10) || 4;
+                countdown = duration;
+                phaseStartTime = performance.now();
+                
+                // Update visuals for the new phase
+                updatePhaseVisuals();
+            }
+        }
+
+        function stopBreathing() {
+            if (!isRunning) return;
+            isRunning = false;
+            clearInterval(intervalId);
+            cancelAnimationFrame(animationId);
+            startStopButton.textContent = "Start";
+            startStopButton.classList.remove('stop');
+            durationInput.disabled = false;
+            resetCircleToInitial();
+            statusMessage.textContent = "Paused. Click 'Start' to resume.";
+            
+            // Pause meditation timer
+            pauseMeditationTimer();
+        }
+
+        function resetMeditationTimer() {
+            clearInterval(meditationTimerId);
+            meditationTotalTime = 0;
+            meditationTimer.classList.remove('active');
+            
+            // Update the timer display but keep the reset button
+            const resetButton = document.getElementById('reset-timer-button');
+            const timerDisplay = document.createElement('span');
+            timerDisplay.textContent = "Total Time: 00:00";
+            
+            // Clear the timer content
+            meditationTimer.innerHTML = '';
+            
+            // Add the display and button back
+            meditationTimer.appendChild(timerDisplay);
+            meditationTimer.appendChild(resetButton);
+        }
+
+        startStopButton.addEventListener('click', () => {
+            if (isRunning) {
+                stopBreathing();
+            } else {
+                startBreathing();
+            }
+        });
+
+        resetTimerButton.addEventListener('click', () => {
+            resetMeditationTimer();
+        });
+
+        // Initialize display
+        resetCircleToInitial();
+        timerText.textContent = durationInput.value; // Show default duration initially
+        instructionText.textContent = "Ready";
+        statusMessage.textContent = "Set duration and click 'Start'.";
+
+    </script>
+
+</body>
+</html>
