@@ -5,8 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sirvan Almasi</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                    },
+                },
+                fontFamily: {
+                    sans: ['Quicksand', 'sans-serif'],
+                },
+            },
+        }
+    </script>
     <style>
         @font-face {
             font-family: asans;
@@ -16,39 +41,60 @@
             font-style: normal
         }
         body {
-            font-family: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            font-family: asans;
+            font-family: 'Quicksand', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            /* font-family: asans; */
+            background-color: #f8f9fa;
+            line-height: 1.5;
+            color: #334155;
         }
         .loading, .error {
-            padding: 1em;
-            color: #666;
+            padding: 0.75em;
+            color: #64748b;
+            font-size: 0.875rem;
         }
         .error {
-            color: #d33;
+            color: #ef4444;
         }
         .content-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1em;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
         }
         .card {
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-2px);
         }
         .card-title {
-            font-weight: bold;
+            font-weight: 600;
             width: 85%;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
         }
         .card-description {
-            line-height: 20px;
+            line-height: 1.4;
             text-align: justify;
+            font-size: 0.875rem;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.875rem;
         }
         th, td {
-            padding: 0.5em;
+            padding: 0.5em 0.75em;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            font-weight: 600;
+            color: #1e293b;
+            background-color: #f1f5f9;
+        }
+        tr:hover {
+            background-color: #f8fafc;
         }
 
         .btn {
@@ -57,21 +103,25 @@
             justify-content: center;
             border-radius: 0.375rem;
             font-weight: 500;
-            padding: 0.5rem 1rem;
+            padding: 0.375rem 0.75rem;
             transition: all 0.2s;
             cursor: pointer;
+            font-size: 0.875rem;
         }
 
         /* Primary button */
         .btn-primary {
-            background-color: hsl(222.2, 47.4%, 11.2%);
+            background-color: #0ea5e9;
             color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0284c7;
         }
 
         /* Header styles */
         .header {
-            padding: 2rem 0;
-            border-bottom: 1px solid #eee;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         .social-links {
@@ -81,81 +131,106 @@
         }
         
         .social-link {
-            color: #374151;
+            color: #64748b;
             transition: color 0.2s;
         }
         
         .social-link:hover {
-            color: #1f2937;
+            color: #0ea5e9;
+        }
+
+        /* Custom styles */
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -4px;
+            width: 2rem;
+            height: 2px;
+            background-color: #0ea5e9;
+        }
+
+        blockquote {
+            background-color: #f1f5f9;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-style: italic;
+            border-left: 4px solid #0ea5e9 !important;
         }
     </style>
 </head>
 <body>
-<div class="bg-stone-50 pt-10 pb-6 mb-2">
-    <header class="container mx-auto">
+<div class="bg-gradient-to-r from-primary-50 to-white pt-8 pb-4 mb-4 shadow-sm">
+    <header class="container mx-auto px-4">
         <div class="flex justify-between items-center">
-            <h1 class="text-3xl font-bold">Sirvan Almasi</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-primary-800">Sirvan Almasi</h1>
             <div class="social-links">
-                <a href="https://github.com/sirvan3tr" target="_blank" class="social-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <a href="https://github.com/sirvan3tr" target="_blank" class="social-link hover:text-primary-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
                 </a>
-                <a href="https://www.linkedin.com/in/salmasi/" target="_blank" class="social-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <a href="https://www.linkedin.com/in/salmasi/" target="_blank" class="social-link hover:text-primary-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                     </svg>
                 </a>
-                <a href="https://twitter.com/sevthreetr" target="_blank" class="social-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <a href="https://twitter.com/sevthreetr" target="_blank" class="social-link hover:text-primary-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
                     </svg>
                 </a>
             </div>
         </div>
-        <p>Engineer and humorist.</p>
-        <blockquote class="pl-4 my-4 italic text-gray-600 border-l-4 border-gray-300">
+        <p class="text-sm text-primary-700 font-medium">Engineer and humorist.</p>
+        <blockquote class="my-3 text-gray-600 text-sm">
             "Whatever you can do or dream you can, begin it. Boldness has genius, power, and magic in it."
-            <cite class="block text-sm mt-2">- Goethe</cite>
+            <cite class="block text-xs mt-1 font-medium">- Goethe</cite>
         </blockquote>
     </header>
 </div>
-<div class="container mx-auto">
+<div class="container mx-auto px-4">
 
-    <div class="grid grid-cols-4 gap-2">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Left Column (Main Content) -->
-        <div class="col-span-3 bg-white p-4">
-            <h1 class="text-2xl font-bold mb-4">Projects</h1>
+        <div class="md:col-span-3 bg-white p-4 rounded-lg shadow-sm">
+            <h1 class="section-title text-xl font-bold">Projects</h1>
             <div id="projects" class="project-grid">
                 <div class="loading">Loading projects...</div>
             </div>
         </div>
         
         <!-- Right Column (Sidebar) -->
-        <div class="col-span-1 bg-stone-50 p-4 rounded-lg">
-            <h2 class="text-2xl font-bold mb-4">Links</h2>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+            <h2 class="section-title text-xl font-bold">Links</h2>
             <div id="sidebarLinks">
                 <div class="loading">Loading links...</div>
             </div>
-            <div class="mt-6 border border-solid border-stone-400 rounded-lg px-2 py-1 text-xs flex justify-center items-center">
-                <div>Powered By</div>
-                <img src="img/gsheet_logo.png" width="30" alt="Powered by Google Sheets" />
+            <div class="mt-4 border border-gray-200 rounded-lg px-2 py-1 text-xs flex justify-center items-center bg-gray-50">
+                <div class="text-gray-500">Powered By</div>
+                <img src="img/gsheet_logo.png" width="24" alt="Powered by Google Sheets" class="ml-1" />
             </div>
         </div>
     </div>
 
-    <h1 class="text-2xl font-bold mb-4 mt-6">Papers</h1>
-    <div id="papers">
+    <h1 class="section-title text-xl font-bold mt-6">Papers</h1>
+    <div id="papers" class="bg-white p-4 rounded-lg shadow-sm mt-2">
         <div class="loading">Loading papers...</div>
     </div>
-    <div></div>
-    <footer class="rounded-lg bg-gray-600 text-white py-4 mt-12">
-        <div class="container mx-auto p-8">
-            <h2 class="text-2xl font-bold">How is this site made?</h2>
-            <p class="mt-2">This site is built using HTML, CSS, and JavaScript--hosted on github. The data is stored in a Google Sheet and fetched using the PapaParse library. Everything is data.</p>
+    
+    <footer class="rounded-lg bg-gradient-to-r from-gray-700 to-gray-800 text-white py-2 mt-8">
+        <div class="container mx-auto p-4">
+            <h2 class="text-xl font-bold mb-2">How is this site made?</h2>
+            <p class="mt-1 text-sm text-gray-200">This site is built using HTML, CSS, and JavaScript--hosted on github. The data is stored in a Google Sheet and fetched using the PapaParse library. Everything is data.</p>
         </div>
-        <hr />
-        <div class="container mx-auto text-center space-y-2 p-8">
+        <hr class="border-gray-600" />
+        <div class="container mx-auto text-center py-2 text-xs text-gray-400">
+            © 2023 Sirvan Almasi
         </div>
     </footer>
 </div>
@@ -168,20 +243,20 @@
                 const html = data
                     .filter(item => item.title || item.description)
                     .map(item => `
-                        <div class="card relative flex flex-col h-full hover:shadow-md hover:bg-neutral-50 bg-stone-50/20 rounded-lg border border-solid border-stone-200 hover:border-stone-200">
-                            ${item.img ? `<img class="shadow-md rounded-lg" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.title)}" class="h-48 object-cover" />` : ''}
-                            <div class="absolute top-1 right-2">
-                              <span class="px-2 py-1 text-xs font-medium text-white bg-black/50 backdrop-blur-md rounded-full">
+                        <div class="card relative flex flex-col h-full bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-md overflow-hidden">
+                            ${item.img ? `<img class="h-40 w-full object-cover" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.title)}" />` : ''}
+                            <div class="absolute top-2 right-2">
+                              <span class="px-2 py-0.5 text-xs font-medium text-white bg-black/50 backdrop-blur-sm rounded-full">
                                 ${escapeHtml(item.year || '')}
                               </span>
                             </div>
-                            <div class="card-content px-2 pt-1 flex-grow">
-                                <div class="card-title text-zinc-800">${escapeHtml(item.title || '')}</div>
-                                <div class="card-tags mb-2">${escapeHtml(item.tags || '').split(' ').map(tag => `<span class="rounded-lg bg-zinc-200/50 text-zinc-800 py-1 px-2 text-xs mr-1">${tag}</span>`).join('')}</div>
-                                <div class="card-description text-zinc-600">${escapeHtml(item.description || '')}</div>
+                            <div class="card-content p-3 flex-grow">
+                                <div class="card-title text-primary-800">${escapeHtml(item.title || '')}</div>
+                                <div class="card-tags mb-2">${escapeHtml(item.tags || '').split(' ').map(tag => `<span class="rounded-full bg-gray-100 text-gray-700 py-0.5 px-2 text-xs mr-1">${tag}</span>`).join('')}</div>
+                                <div class="card-description text-gray-600">${escapeHtml(item.description || '')}</div>
                             </div>
-                            <div class="card-footer flex justify-end p-2 mt-auto">
-                                ${item.link ? `<a class='bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-1 px-2 border-b-4 border-indigo-700 hover:border-indigo-500 rounded' href="${escapeHtml(item.link)}" target="_blank">View More</a>` : ''}
+                            <div class="card-footer flex justify-end p-2 mt-auto bg-gray-50">
+                                ${item.link ? `<a class="btn bg-primary-500 hover:bg-primary-600 text-white font-medium py-1 px-2 rounded text-xs shadow-sm" href="${escapeHtml(item.link)}" target="_blank">View More</a>` : ''}
                             </div>
                         </div>
                     `).join('');
@@ -191,13 +266,13 @@
         papers: {
             url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTmclWnVojUllOX7cYmu3iWWU43l2AKeFPbNt9Gke4ADI22ydoNa4ZfVG7YWas4tAtIDap3-En4u_Ft/pub?gid=177742904&single=true&output=csv',
             display: data => `
-                <table>
+                <table class="w-full">
                     <thead>
-                        <tr>
-                            <th>Date</th>
+                        <tr class="bg-gray-50">
+                            <th class="rounded-tl-lg">Date</th>
                             <th>Author</th>
                             <th>Title</th>
-                            <th>Type</th>
+                            <th class="rounded-tr-lg">Type</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -205,10 +280,10 @@
                             .filter(item => item.title || item.author)
                             .map(item => `
                                 <tr>
-                                    <td>${escapeHtml(item.date || '')}</td>
+                                    <td class="font-medium text-gray-500">${escapeHtml(item.date || '')}</td>
                                     <td>${escapeHtml(item.author || '')}</td>
-                                    <td>${escapeHtml(item.title || '')}</td>
-                                    <td>${escapeHtml(item.type || '')}</td>
+                                    <td class="text-primary-700">${escapeHtml(item.title || '')}</td>
+                                    <td><span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs">${escapeHtml(item.type || '')}</span></td>
                                 </tr>
                             `).join('')}
                     </tbody>
@@ -221,15 +296,15 @@
                 const html = data
                     .filter(item => item.title && item.link)
                     .map(item => `
-                        <li class="mb-2">
+                        <li class="mb-1.5">
                             <a href="${escapeHtml(item.link)}" 
-                               class="text-blue-600 hover:text-blue-800 hover:underline"
+                               class="text-primary-600 hover:text-primary-800 hover:underline text-sm"
                                target="_blank">
                                 ${escapeHtml(item.title)}
                             </a>
                         </li>
                     `).join('');
-                return `<ul class="list-disc pl-5 space-y-1">${html}</ul>`;
+                return `<ul class="list-disc pl-5 space-y-0.5 text-sm">${html}</ul>`;
             }
         }
     };
