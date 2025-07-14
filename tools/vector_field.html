@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Field Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #canvas {
+            border: 2px solid #444;
+            cursor: grab;
+            background-color: #0a0a0a;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        #canvas:active {
+            cursor: grabbing;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .particle-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .particle-controls.positive {
+            border: 1px solid rgba(255, 100, 100, 0.3);
+        }
+        
+        .particle-controls.negative {
+            border: 1px solid rgba(100, 100, 255, 0.3);
+        }
+        
+        label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        input[type="range"] {
+            width: 120px;
+        }
+        
+        .info {
+            margin-bottom: 20px;
+            text-align: center;
+            opacity: 0.8;
+        }
+        
+        .particle-label {
+            font-weight: bold;
+            min-width: 80px;
+        }
+        
+        .positive-label {
+            color: #ff6666;
+        }
+        
+        .negative-label {
+            color: #6666ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h2>Interactive Vector Field - Two Charges</h2>
+        <p>Drag the charged particles to see how their fields interact</p>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    
+    <div class="controls">
+        <div class="particle-controls positive">
+            <span class="particle-label positive-label">Positive (+)</span>
+            <label>
+                Charge:
+                <input type="range" id="charge1Strength" min="0" max="100" value="50">
+                <span id="charge1Value">50</span>
+            </label>
+        </div>
+        
+        <div class="particle-controls negative">
+            <span class="particle-label negative-label">Negative (−)</span>
+            <label>
+                Charge:
+                <input type="range" id="charge2Strength" min="0" max="100" value="50">
+                <span id="charge2Value">50</span>
+            </label>
+        </div>
+        
+        <label>
+            Grid Density:
+            <input type="range" id="gridDensity" min="10" max="30" value="20">
+            <span id="densityValue">20</span>
+        </label>
+        
+        <label>
+            <input type="checkbox" id="showField" checked>
+            Show Field
+        </label>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Canvas setup
+        canvas.width = 800;
+        canvas.height = 600;
+        
+        // Particles
+        const particles = [
+            {
+                x: canvas.width / 3,
+                y: canvas.height / 2,
+                charge: 50,
+                radius: 15,
+                color: '#ff3333',
+                glowColor: 'rgba(255, 100, 100, 0.8)'
+            },
+            {
+                x: 2 * canvas.width / 3,
+                y: canvas.height / 2,
+                charge: -50,
+                radius: 15,
+                color: '#3333ff',
+                glowColor: 'rgba(100, 100, 255, 0.8)'
+            }
+        ];
+        
+        // Grid properties
+        let gridSpacing = 20;
+        let vectorLength = 15;
+        
+        // Mouse tracking
+        let isDragging = false;
+        let draggedParticle = null;
+        let dragOffset = { x: 0, y: 0 };
+        
+        // Controls
+        const gridDensitySlider = document.getElementById('gridDensity');
+        const charge1StrengthSlider = document.getElementById('charge1Strength');
+        const charge2StrengthSlider = document.getElementById('charge2Strength');
+        const showFieldCheckbox = document.getElementById('showField');
+        const densityValue = document.getElementById('densityValue');
+        const charge1Value = document.getElementById('charge1Value');
+        const charge2Value = document.getElementById('charge2Value');
+        
+        gridDensitySlider.addEventListener('input', (e) => {
+            gridSpacing = 40 - parseInt(e.target.value);
+            densityValue.textContent = e.target.value;
+            draw();
+        });
+        
+        charge1StrengthSlider.addEventListener('input', (e) => {
+            particles[0].charge = parseInt(e.target.value);
+            charge1Value.textContent = e.target.value;
+            draw();
+        });
+        
+        charge2StrengthSlider.addEventListener('input', (e) => {
+            particles[1].charge = -parseInt(e.target.value);
+            charge2Value.textContent = e.target.value;
+            draw();
+        });
+        
+        showFieldCheckbox.addEventListener('change', () => draw());
+        
+        // Mouse events
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Check which particle is clicked
+            for (let particle of particles) {
+                const dx = mouseX - particle.x;
+                const dy = mouseY - particle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance <= particle.radius) {
+                    isDragging = true;
+                    draggedParticle = particle;
+                    dragOffset.x = dx;
+                    dragOffset.y = dy;
+                    canvas.style.cursor = 'grabbing';
+                    break;
+                }
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging || !draggedParticle) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            draggedParticle.x = e.clientX - rect.left - dragOffset.x;
+            draggedParticle.y = e.clientY - rect.top - dragOffset.y;
+            
+            // Keep particle within bounds
+            draggedParticle.x = Math.max(draggedParticle.radius, Math.min(canvas.width - draggedParticle.radius, draggedParticle.x));
+            draggedParticle.y = Math.max(draggedParticle.radius, Math.min(canvas.height - draggedParticle.radius, draggedParticle.y));
+            
+            draw();
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            draggedParticle = null;
+            canvas.style.cursor = 'grab';
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+            draggedParticle = null;
+            canvas.style.cursor = 'grab';
+        });
+        
+        // Calculate electric field at a point (superposition of both particles)
+        function calculateField(x, y) {
+            let totalEx = 0;
+            let totalEy = 0;
+            
+            for (let particle of particles) {
+                const dx = x - particle.x;
+                const dy = y - particle.y;
+                const distanceSquared = dx * dx + dy * dy;
+                
+                if (distanceSquared < 100) continue;
+                
+                const distance = Math.sqrt(distanceSquared);
+                const magnitude = Math.abs(particle.charge) * 1000 / distanceSquared;
+                
+                // Calculate field components
+                let Ex, Ey;
+                if (particle.charge > 0) {
+                    // Positive charge: field points away
+                    Ex = magnitude * dx / distance;
+                    Ey = magnitude * dy / distance;
+                } else {
+                    // Negative charge: field points toward
+                    Ex = -magnitude * dx / distance;
+                    Ey = -magnitude * dy / distance;
+                }
+                
+                totalEx += Ex;
+                totalEy += Ey;
+            }
+            
+            const totalMagnitude = Math.sqrt(totalEx * totalEx + totalEy * totalEy);
+            const angle = Math.atan2(totalEy, totalEx);
+            
+            return { magnitude: totalMagnitude, angle: angle };
+        }
+        
+        // Get color based on field strength
+        function getFieldColor(magnitude) {
+            // Normalize magnitude for color mapping
+            const normalizedMag = Math.min(magnitude / 50, 1);
+            
+            // Create gradient from blue (weak) to red (strong)
+            if (normalizedMag < 0.5) {
+                // Blue to green
+                const ratio = normalizedMag * 2;
+                const r = Math.floor(0 * (1 - ratio) + 0 * ratio);
+                const g = Math.floor(100 * (1 - ratio) + 255 * ratio);
+                const b = Math.floor(255 * (1 - ratio) + 0 * ratio);
+                return `rgb(${r}, ${g}, ${b})`;
+            } else {
+                // Green to red
+                const ratio = (normalizedMag - 0.5) * 2;
+                const r = Math.floor(0 * (1 - ratio) + 255 * ratio);
+                const g = Math.floor(255 * (1 - ratio) + 0 * ratio);
+                const b = Math.floor(0 * (1 - ratio) + 0 * ratio);
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+        }
+        
+        // Draw arrow
+        function drawArrow(x, y, angle, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            
+            // Arrow shaft
+            ctx.beginPath();
+            ctx.moveTo(-vectorLength / 2, 0);
+            ctx.lineTo(vectorLength / 2, 0);
+            ctx.stroke();
+            
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(vectorLength / 2, 0);
+            ctx.lineTo(vectorLength / 2 - 6, -4);
+            ctx.moveTo(vectorLength / 2, 0);
+            ctx.lineTo(vectorLength / 2 - 6, 4);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        // Draw a particle
+        function drawParticle(particle) {
+            // Particle glow effect
+            const gradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.radius * 2);
+            gradient.addColorStop(0, particle.glowColor);
+            gradient.addColorStop(0.5, particle.glowColor.replace('0.8', '0.4'));
+            gradient.addColorStop(1, particle.glowColor.replace('0.8', '0'));
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.radius * 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Particle core
+            ctx.fillStyle = particle.color;
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Particle border
+            ctx.strokeStyle = particle.charge > 0 ? '#ff6666' : '#6666ff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Charge symbol
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(particle.charge > 0 ? '+' : '−', particle.x, particle.y);
+        }
+        
+        // Draw field lines
+        function drawFieldLines() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 1;
+            
+            // Field lines from positive charge
+            if (particles[0].charge > 0) {
+                const numLines = 12;
+                for (let i = 0; i < numLines; i++) {
+                    const angle = (i / numLines) * 2 * Math.PI;
+                    const startX = particles[0].x + Math.cos(angle) * (particles[0].radius + 5);
+                    const startY = particles[0].y + Math.sin(angle) * (particles[0].radius + 5);
+                    
+                    drawFieldLine(startX, startY, 80);
+                }
+            }
+        }
+        
+        function drawFieldLine(startX, startY, maxSteps) {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            
+            let x = startX;
+            let y = startY;
+            
+            for (let step = 0; step < maxSteps; step++) {
+                const field = calculateField(x, y);
+                if (field.magnitude < 0.1) break;
+                
+                const stepSize = 4;
+                x += Math.cos(field.angle) * stepSize;
+                y += Math.sin(field.angle) * stepSize;
+                
+                // Check if we're too close to negative charge
+                const dx = x - particles[1].x;
+                const dy = y - particles[1].y;
+                if (Math.sqrt(dx * dx + dy * dy) < particles[1].radius + 5) break;
+                
+                if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) break;
+                
+                ctx.lineTo(x, y);
+            }
+            
+            ctx.stroke();
+        }
+        
+        // Main draw function
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw vector field
+            if (showFieldCheckbox.checked) {
+                for (let x = gridSpacing; x < canvas.width; x += gridSpacing) {
+                    for (let y = gridSpacing; y < canvas.height; y += gridSpacing) {
+                        const field = calculateField(x, y);
+                        
+                        if (field.magnitude > 0) {
+                            const color = getFieldColor(field.magnitude);
+                            drawArrow(x, y, field.angle, color);
+                        }
+                    }
+                }
+                
+                // Draw field lines
+                drawFieldLines();
+            }
+            
+            // Draw particles
+            for (let particle of particles) {
+                drawParticle(particle);
+            }
+        }
+        
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>
